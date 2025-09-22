@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+  namespace: {{ .Release.Namespace }}  # Namespace automático do Helm.
+spec:
+  replicas: {{ .Values.deployment.replicas }}  # Configurável.
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.appName }}
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ .Values.deployment.strategy.maxSurge }}
+      maxUnavailable: {{ .Values.deployment.strategy.maxUnavailable }}
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:  # Copie as annotations do seu YAML.
+        kubectl.kubernetes.io/restartedAt: {{ .Values.deployment.annotations.restartedAt | quote }}  # Torne string.
+        sidecar.istio.io/proxyCPU: {{ .Values.deployment.annotations.proxyCPU }}
+        sidecar.istio.io/proxyCPULimit: {{ .Values.deployment.annotations.proxyCPULimit }}
+        sidecar.istio.io/proxyMemory: {{ .Values.deployment.annotations.proxyMemory }}
+        sidecar.istio.io/proxyMemoryLimit: {{ .Values.deployment.annotations.proxyMemoryLimit }}
+      labels:
+        app.kubernetes.io/name: {{ .Values.appName }}
+    spec:
+      containers:
+      - image: {{ .Values.deployment.image }}
+        imagePullPolicy: Always
+        name: app-2048
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30

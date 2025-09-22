@@ -1,0 +1,27 @@
+appName: app-2048  # Label comum para selector.
+
+deployment:
+  name: deployment-2048
+  replicas: 5
+  image: public.ecr.aws/l6m2t8p7/docker-2048:latest
+  annotations:
+    restartedAt: "2025-08-30T21:22:19-03:00"
+    proxyCPU: 100m
+    proxyCPULimit: 800m
+    proxyMemory: 128Mi
+    proxyMemoryLimit: 800Mi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 500Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  strategy:
+    maxSurge: 25%
+    maxUnavailable: 25%
+
+service:
+  name: service-2048
+  port: 80
+  type: ClusterIP
